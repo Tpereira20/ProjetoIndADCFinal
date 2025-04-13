@@ -438,32 +438,33 @@ public class UserOperationResource {
 			}
 			if(data.job != null) {
 				userBuilder.set("user_job", data.job);
-			} else if(user.getString("user_job") != null) {
+			} else if(user.contains("user_job")) {
 				userBuilder.set("user_job", user.getString("user_job"));
 			}
+
 			if (data.ccNumber != null && data.ccNumber.matches("\\d+")) {
 				userBuilder.set("user_ccNumber", data.ccNumber);
-			} else if(user.getString("user_ccnumber") != null) {
+			} else if(user.contains("user_ccNumber")) {
 				userBuilder.set("user_ccnumber", user.getString("user_ccnumber"));
 			}
 			if (data.nif != null) {
 				userBuilder.set("user_nif", data.nif);
-			} else if(user.getString("user_nif") != null) {
+			} else if(user.contains("user_nif")) {
 				userBuilder.set("user_nif", user.getString("user_nif"));
 			}
 			if (data.employer != null) {
 				userBuilder.set("user_employer", data.employer);
-			} else if(user.getString("user_employer") != null) {
+			} else if(user.contains("user_employer")) {
 				userBuilder.set("user_employer", user.getString("user_employer"));
 			}
 			if (data.address != null) {
 				userBuilder.set("user_address", data.address);
-			} else if(user.getString("user_address") != null) {
+			} else if(user.contains("user_address")) {
 				userBuilder.set("user_address", user.getString("user_address"));
 			}
 			if (data.employerNif != null && data.employerNif.matches("\\d+")) {
 				userBuilder.set("user_employernif", data.employerNif);
-			} else if(user.getString("user_employernif") != null) {
+			} else if(user.contains("user_employernif")) {
 				userBuilder.set("user_employernif", user.getString("user_employernif"));
 			}
 
@@ -504,39 +505,35 @@ public class UserOperationResource {
 			} else {
 				userBuilder.set("user_privacy", user.getString("user_privacy"));
 			}
-			if(data.password != null) {
-				userBuilder.set("user_pwd", data.password);
-			} else {
-				userBuilder.set("user_pwd", user.getString("user_pwd"));
-			}
 			if(data.job != null) {
 				userBuilder.set("user_job", data.job);
-			} else if(user.getString("user_job") != null) {
+			} else if(user.contains("user_job")) {
 				userBuilder.set("user_job", user.getString("user_job"));
 			}
+
 			if (data.ccNumber != null && data.ccNumber.matches("\\d+")) {
 				userBuilder.set("user_ccNumber", data.ccNumber);
-			} else if(user.getString("user_ccnumber") != null) {
+			} else if(user.contains("user_ccNumber")) {
 				userBuilder.set("user_ccnumber", user.getString("user_ccnumber"));
 			}
 			if (data.nif != null) {
 				userBuilder.set("user_nif", data.nif);
-			} else if(user.getString("user_nif") != null) {
+			} else if(user.contains("user_nif")) {
 				userBuilder.set("user_nif", user.getString("user_nif"));
 			}
 			if (data.employer != null) {
 				userBuilder.set("user_employer", data.employer);
-			} else if(user.getString("user_employer") != null) {
+			} else if(user.contains("user_employer")) {
 				userBuilder.set("user_employer", user.getString("user_employer"));
 			}
 			if (data.address != null) {
 				userBuilder.set("user_address", data.address);
-			} else if(user.getString("user_address") != null) {
+			} else if(user.contains("user_address")) {
 				userBuilder.set("user_address", user.getString("user_address"));
 			}
 			if (data.employerNif != null && data.employerNif.matches("\\d+")) {
 				userBuilder.set("user_employernif", data.employerNif);
-			} else if(user.getString("user_employernif") != null) {
+			} else if(user.contains("user_employernif")) {
 				userBuilder.set("user_employernif", user.getString("user_employernif"));
 			}
 
@@ -562,6 +559,11 @@ public class UserOperationResource {
 			} else {
 				userBuilder.set("user_full_name", user.getString("user_full_name"));
 			}
+			if(data.accountState != null) {
+				userBuilder.set("user_accountstate", data.accountState);
+			} else {
+				userBuilder.set("user_accountstate", user.getString("user_accountstate"));
+			}
 			if(data.role != null) {
 				if(!(data.role.equals("admin") || data.role.equals("enduser") || data.role.equals("partner") || data.role.equals("backoffice")))
 					return Response.status(Status.BAD_REQUEST).entity("Invalid role.").build();
@@ -586,39 +588,43 @@ public class UserOperationResource {
 			} else {
 				userBuilder.set("user_privacy", user.getString("user_privacy"));
 			}
+
+
 			if(data.password != null) {
 				userBuilder.set("user_pwd", data.password);
 			} else {
 				userBuilder.set("user_pwd", user.getString("user_pwd"));
 			}
+
 			if(data.job != null) {
 				userBuilder.set("user_job", data.job);
-			} else if(user.getString("user_job") != null) {
+			} else if(user.contains("user_job")) {
 				userBuilder.set("user_job", user.getString("user_job"));
 			}
+
 			if (data.ccNumber != null && data.ccNumber.matches("\\d+")) {
 				userBuilder.set("user_ccNumber", data.ccNumber);
-			} else if(user.getString("user_ccnumber") != null) {
+			} else if(user.contains("user_ccNumber")) {
 				userBuilder.set("user_ccnumber", user.getString("user_ccnumber"));
 			}
 			if (data.nif != null) {
 				userBuilder.set("user_nif", data.nif);
-			} else if(user.getString("user_nif") != null) {
+			} else if(user.contains("user_nif")) {
 				userBuilder.set("user_nif", user.getString("user_nif"));
 			}
 			if (data.employer != null) {
 				userBuilder.set("user_employer", data.employer);
-			} else if(user.getString("user_employer") != null) {
+			} else if(user.contains("user_employer")) {
 				userBuilder.set("user_employer", user.getString("user_employer"));
 			}
 			if (data.address != null) {
 				userBuilder.set("user_address", data.address);
-			} else if(user.getString("user_address") != null) {
+			} else if(user.contains("user_address")) {
 				userBuilder.set("user_address", user.getString("user_address"));
 			}
 			if (data.employerNif != null && data.employerNif.matches("\\d+")) {
 				userBuilder.set("user_employernif", data.employerNif);
-			} else if(user.getString("user_employernif") != null) {
+			} else if(user.contains("user_employernif")) {
 				userBuilder.set("user_employernif", user.getString("user_employernif"));
 			}
 

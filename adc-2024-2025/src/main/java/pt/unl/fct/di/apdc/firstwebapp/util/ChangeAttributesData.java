@@ -6,7 +6,6 @@ public class ChangeAttributesData {
     public String email;
     public String username;
     public String password;
-    public String confirmation;
     public String name;
     public String phoneNumber;
     public String privacy;
@@ -25,12 +24,11 @@ public class ChangeAttributesData {
 
     }
 
-    public ChangeAttributesData(String emailOfChange, String email, String username, String name, String phoneNumber, String password, String confirmation, String privacy, String role,
+    public ChangeAttributesData(String emailOfChange, String email, String username, String name, String phoneNumber, String password, String privacy, String role,
                         String nif, String employer, String job, String address, String employerNif, String accountState) {
         this.emailOfChange = emailOfChange;
         this.username = username;
         this.password = password;
-        this.confirmation = confirmation;
         this.email = email;
         this.name = name;
         this.phoneNumber = phoneNumber;
