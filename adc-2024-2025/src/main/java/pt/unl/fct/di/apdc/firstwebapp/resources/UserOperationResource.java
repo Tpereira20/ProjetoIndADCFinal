@@ -180,7 +180,7 @@ public class UserOperationResource {
 		if(!(data.role.equals("enduser") || data.role.equals("admin") || data.role.equals("backoffice") || data.role.equals("partner")))
 			return Response.status(Status.BAD_REQUEST).entity("Invalid role.").build();
 
-		Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
+		Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.email);
 		Entity user = datastore.get(userKey);
 
 		if(user == null) {
@@ -191,7 +191,7 @@ public class UserOperationResource {
 		Entity tokenEnt = datastore.get(tokenKey);
 
 		if(tokenEnt != null) {
-			if(data.username.equals(tokenEnt.getString("token_userid")))
+			if(data.email.equals(tokenEnt.getString("token_userid")))
 				return Response.status(Status.BAD_REQUEST).entity("Can't change your own role...").build();
 
 			if(data.role.equals(user.getString("user_role")))
@@ -203,13 +203,13 @@ public class UserOperationResource {
 
 			if(!(tokenEnt.getString("token_role").equals("backoffice") && (user.getString("user_role").equals("admin")) ||
 					user.getString("user_role").equals("backoffice") || data.role.equals("admin"))) {
-				user = Entity.newBuilder(userKey)
+				user = Entity.newBuilder(user)
 								.set("user_role", data.role)
 										.build();
 				datastore.update(user);
 				return Response.ok(g.toJson(tokenEnt)).build();
 			} else if(tokenEnt.getString("token_role").equals("admin")) {
-				user = Entity.newBuilder(userKey)
+				user = Entity.newBuilder(user)
 						.set("user_role", data.role)
 						.build();
 				datastore.update(user);
@@ -231,7 +231,7 @@ public class UserOperationResource {
 		if(!(data.role.equals("desativada") || data.role.equals("ativada") || data.role.equals("suspensa")))
 			return Response.status(Status.BAD_REQUEST).entity("Invalid account state.").build();
 
-		Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.username);
+		Key userKey = datastore.newKeyFactory().setKind("User").newKey(data.email);
 		Entity user = datastore.get(userKey);
 
 		if(user == null) {
@@ -247,13 +247,13 @@ public class UserOperationResource {
 				return Response.status(Status.BAD_REQUEST).entity("Same state as current state").build();
 
 			if(tokenEnt.getString("token_role").equals("admin")) {
-				user = Entity.newBuilder(userKey)
+				user = Entity.newBuilder(user)
 						.set("user_accountstate", data.role)
 						.build();
 				datastore.update(user);
 				return Response.ok(g.toJson(tokenEnt)).build();
 			} else if(tokenEnt.getString("token_role").equals("backoffice") && !data.role.equals("suspensa")) {
-				user = Entity.newBuilder(userKey)
+				user = Entity.newBuilder(user)
 						.set("user_accountstate", data.role)
 						.build();
 				datastore.update(user);
@@ -642,8 +642,41 @@ public class UserOperationResource {
 	@POST
 	@Path("/changepassword")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response changeAttributes(@HeaderParam("Authorization") String tokenId, LoginData data) {
-		return Response.status(Status.UNAUTHORIZED).entity("Unauthorized").build();
+	public Response changePassword(@HeaderParam("Authorization") String tokenId, ChangePwdData data) {
+		LOG.fine("Attempt to change password: " + tokenId);
+
+		Key tokenKey = datastore.newKeyFactory().setKind("Token").newKey(tokenId);
+		Entity tokenEnt = datastore.get(tokenKey);
+
+		if (tokenEnt == null) {
+			return Response.status(Status.UNAUTHORIZED).entity("Not logged in...").build();
+		}
+
+		Key userKey = datastore.newKeyFactory().setKind("User").newKey(tokenEnt.getString("token_userid"));
+		Entity user = datastore.get(userKey);
+
+		if(user == null) {
+			return Response.status(Status.UNAUTHORIZED).entity("User does not exist...").build();
+		}
+
+		String hashedPWD = (String) user.getString(USER_PWD);
+		if (!hashedPWD.equals(DigestUtils.sha512Hex(data.password))) {
+			return Response.status(Status.UNAUTHORIZED).entity("Invalid password...").build();
+		} else {
+			if (!(data.newPassword != null && data.confirmation != null))
+				return Response.status(Status.UNAUTHORIZED).entity("Fill the new password...").build();
+			if (hashedPWD.equals(DigestUtils.sha512Hex(data.newPassword)))
+				return Response.status(Status.UNAUTHORIZED).entity("Can't change to the same password as before...").build();
+			if (!data.newPassword.equals(data.confirmation)) {
+				return Response.status(Status.UNAUTHORIZED).entity("New password and confirmation are not the same...").build();
+			} else {
+				user = Entity.newBuilder(user)
+						.set("user_pwd", DigestUtils.sha512Hex(data.newPassword))
+						.build();
+				datastore.update(user);
+				return Response.ok("Successfully changed your password!").build();
+			}
+		}
 	}
 
 
