@@ -679,6 +679,23 @@ public class UserOperationResource {
 		}
 	}
 
+	@POST
+	@Path("/logout")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response sessionLogout(@HeaderParam("Authorization") String tokenId) {
+		LOG.fine("Attempt to change password: " + tokenId);
+
+		Key tokenKey = datastore.newKeyFactory().setKind("Token").newKey(tokenId);
+		Entity tokenEnt = datastore.get(tokenKey);
+
+		if (tokenEnt == null) {
+			return Response.status(Status.UNAUTHORIZED).entity("Not logged in...").build();
+		}
+
+		datastore.delete(tokenKey);
+		return Response.ok("Successfully logged out!").build();
+	}
+
 
 
 
