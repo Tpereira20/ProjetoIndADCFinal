@@ -696,7 +696,72 @@ public class UserOperationResource {
 		return Response.ok("Successfully logged out!").build();
 	}
 
+	@POST
+	@Path("/createworksheet")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response createWorkSheet(@HeaderParam("Authorization") String tokenId, WorksheetData data) {
+		LOG.fine("Attempt to create worksheet: " + data.workReference);
 
+		if (!data.isValid()) {
+			return Response.status(Status.BAD_REQUEST).entity("Missing or invalid worksheet data.").build();
+		}
+
+		Key worksheetKey = datastore.newKeyFactory().setKind("Worksheet").newKey(data.workReference);
+		Entity worksheet = datastore.get(worksheetKey);
+
+		if (worksheet != null) {
+			return Response.status(Status.BAD_REQUEST).entity("Worksheet with this reference already exists.").build();
+		}
+
+		Key tokenKey = datastore.newKeyFactory().setKind("Token").newKey(tokenId);
+		Entity token = datastore.get(tokenKey);
+
+		if(token == null) {
+			return Response.status(Status.UNAUTHORIZED).entity("Not logged in...").build();
+		}
+
+
+		if (worksheet == null) {
+			if(!token.getString("token_role").equals("partner")) {
+				return Response.status(Status.UNAUTHORIZED).entity("You are not a partner, can't create a worksheet...").build();
+			}
+			worksheet = Entity.newBuilder(worksheetKey)
+					.set("work_reference", data.workReference)
+					.set("work_description", data.workDescription)
+					.set("work_target_type", data.targetType)
+					.set("work_award_status", data.awardStatus)
+					.build();
+
+			datastore.put(worksheet);
+			LOG.info("Worksheet created: " + data.workReference);
+		} else {
+			if(!token.getString("token_role").equals("backoffice")) {
+				return Response.status(Status.UNAUTHORIZED).entity("Only backoffice users can change the worksheet awards...").build();
+			}
+			Entity.Builder worksheetBuilder = Entity.newBuilder(worksheet);
+			if (data.awardStatus != null && data.awardStatus.equalsIgnoreCase("AWARDED")) {
+				if (!data.isValidAwarded()) {
+					return Response.status(Status.BAD_REQUEST).entity("Missing or invalid awarded worksheet data.").build();
+				}
+				worksheetBuilder
+						.set("work_reference", worksheet.getString("work_reference"))
+						.set("work_description", worksheet.getString("work_description"))
+						.set("work_target_type", worksheet.getString("work_target_type"))
+						.set("work_status", worksheet.getString("work_status"))
+						.set("work_date", data.awardDate)
+						.set("work_start_date", data.estimatedStartDate)
+						.set("work_estimated_completion_date", data.estimatedCompletionDate)
+						.set("work_entity_account", data.entityAccount)
+						.set("work_awarding_entity", data.awardingEntity)
+						.set("work_company_tin", data.companyTIN)
+						.set("work_status", data.workStatus)
+						.set("work_comments", data.comments);
+				worksheet = worksheetBuilder.build();
+				datastore.put(worksheet);
+			}
+		}
+		return Response.ok("Worksheet successfully created.").build();
+	}
 
 
 	private String isLoggedIn(String email) {
